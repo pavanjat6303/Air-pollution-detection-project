@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 windspeed: document.getElementById('windspeed').value
             };
             
-            const response = await fetch('http://localhost:5000/predict', {
+            const response = await fetch('https://air-pollution-detection-project.onrender.com/predict', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

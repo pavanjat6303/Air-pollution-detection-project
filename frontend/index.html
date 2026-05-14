@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Pollution Prediction</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation -->
+        <nav class="top-nav">
+            <div class="logo">
+                <h1>Air Pollution Prediction</h1>
+                <p>AI-Powered Environmental Monitoring</p>
+            </div>
+            <div class="nav-right">
+                <div id="react-search-root"></div>
+                <button class="icon-btn notification-btn">
+                    <i class="ph ph-bell"></i>
+                    <span class="badge"></span>
+                </button>
+                <button class="icon-btn profile-btn">
+                    <i class="ph ph-user"></i>
+                </button>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="left-column">
+                <div class="section-header">
+                    <div>
+                        <h2>AI Pollution Predictor</h2>
+                        <p class="subtitle">Real-time environmental data analysis and forecasting</p>
+                    </div>
+                    <div class="toggle-container">
+                        <span>Dark Mode</span>
+                        <label class="switch">
+                            <input type="checkbox" id="theme-toggle" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="icon-wrapper green">
+                                <i class="ph ph-wave-sine"></i>
+                            </div>
+                            <span class="trend down"><i class="ph ph-arrow-down"></i> 12%</span>
+                        </div>
+                        <p class="stat-label">PM2.5 Level</p>
+                        <h3 class="stat-value">42 <span class="unit">µg/m³</span></h3>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="icon-wrapper teal">
+                                <i class="ph ph-wind"></i>
+                            </div>
+                            <span class="trend up"><i class="ph ph-arrow-up"></i> 5%</span>
+                        </div>
+                        <p class="stat-label">PM10 Level</p>
+                        <h3 class="stat-value">58 <span class="unit">µg/m³</span></h3>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="icon-wrapper yellow">
+                                <i class="ph ph-sparkle"></i>
+                            </div>
+                            <span class="trend neutral"><i class="ph ph-minus"></i> 0%</span>
+                        </div>
+                        <p class="stat-label">NO2 Level</p>
+                        <h3 class="stat-value">28 <span class="unit">ppb</span></h3>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="icon-wrapper orange">
+                                <i class="ph ph-warning-circle"></i>
+                            </div>
+                            <span class="trend down"><i class="ph ph-arrow-down"></i> 8%</span>
+                        </div>
+                        <p class="stat-label">Current AQI</p>
+                        <h3 class="stat-value">75</h3>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-header">
+                        <div class="icon-wrapper blue">
+                            <i class="ph ph-magic-wand"></i>
+                        </div>
+                        <h2>Predict Air Quality</h2>
+                    </div>
+                    
+                    <form id="prediction-form">
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label>City</label>
+                                <div class="input-wrapper">
+                                    <i class="ph ph-map-pin"></i>
+                                    <input type="text" id="city" placeholder="Enter city name">
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>PM2.5 (µg/m³)</label>
+                                <div class="input-wrapper">
+                                    <i class="ph ph-wave-sine"></i>
+                                    <input type="number" id="pm25" placeholder="0-500">
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <label>PM10 (µg/m³)</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="pm10" placeholder="0-500">
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <label>NO2 (ppb)</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="no2" placeholder="0-200">
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <label>SO2 (ppb)</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="so2" placeholder="0-100">
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <label>CO (ppm)</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="co" placeholder="0-50">
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <label>Temperature (°C)</label>
+                                <div class="input-wrapper">
+                                    <i class="ph ph-thermometer"></i>
+                                    <input type="number" id="temp" placeholder="-50 to 50">
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <label>Humidity (%)</label>
+                                <div class="input-wrapper">
+                                    <i class="ph ph-drop"></i>
+                                    <input type="number" id="humidity" placeholder="0-100">
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <label>Wind Speed (km/h)</label>
+                                <div class="input-wrapper">
+                                    <i class="ph ph-wind"></i>
+                                    <input type="number" id="windspeed" placeholder="0-100">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-primary" id="predict-btn">Predict AQI</button>
+                        
+                        <div id="prediction-result" class="prediction-result" style="display: none; margin-top: 24px; padding: 20px; border-radius: var(--border-radius-md); background: var(--bg-input); border: 1px solid var(--accent-blue); transition: var(--transition);">
+                            <h3 style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px; font-size: 16px;"><i class="ph-fill ph-info"></i> Prediction Result</h3>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px;">
+                                <div>
+                                    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">Predicted AQI</p>
+                                    <h1 id="result-aqi" style="font-size: 36px; font-weight: 700; line-height: 1; color: var(--text-primary);">--</h1>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span id="result-category" style="display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; background: var(--accent-blue); color: white;">--</span>
+                                </div>
+                            </div>
+                            <p id="result-recommendation" style="font-size: 14px; color: var(--text-secondary); line-height: 1.5; border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 12px;">--</p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="right-column">
+                <div class="widget-card weather-card">
+                    <h3>Current Weather</h3>
+                    <div class="weather-main">
+                        <div class="weather-temp">
+                            <h1>24°C</h1>
+                            <p>Partly Cloudy</p>
+                        </div>
+                        <div class="weather-icon">
+                            <i class="ph-fill ph-cloud"></i>
+                        </div>
+                    </div>
+                    <div class="weather-details">
+                        <div class="weather-item">
+                            <i class="ph ph-drop"></i>
+                            <div>
+                                <p class="label">Humidity</p>
+                                <p class="val">65%</p>
+                            </div>
+                        </div>
+                        <div class="weather-item">
+                            <i class="ph ph-wind"></i>
+                            <div>
+                                <p class="label">Wind Speed</p>
+                                <p class="val">12 km/h</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="widget-card stats-widget">
+                    <h3>Quick Stats</h3>
+                    <ul class="stats-list">
+                        <li>
+                            <span>Predictions Today</span>
+                            <span class="val highlight-white">142</span>
+                        </li>
+                        <li>
+                            <span>Accuracy Rate</span>
+                            <span class="val highlight-green">94.2%</span>
+                        </li>
+                        <li>
+                            <span>Data Points</span>
+                            <span class="val highlight-blue">2.4M</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+    <script type="text/babel" src="search.jsx"></script>
+</body>
+</html>

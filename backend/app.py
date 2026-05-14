@@ -4,6 +4,11 @@ import pickle
 import numpy as np
 import os
 
+import logging
+
+# Configure basic logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+
 app = Flask(__name__)
 CORS(app) # Enable CORS for frontend to communicate with backend
 
@@ -11,8 +16,11 @@ CORS(app) # Enable CORS for frontend to communicate with backend
 model_path = os.path.join(os.path.dirname(__file__), 'model.pkl')
 with open(model_path, 'rb') as f:
     saved_data = pickle.load(f)
-    model = saved_data['model']
-    imputer = saved_data['imputer']
+    if 'pipeline' in saved_data:
+        pipeline = saved_data['pipeline']
+    else:
+        model = saved_data['model']
+        imputer = saved_data['imputer']
     features = saved_data['features']
 
 def get_aqi_category(aqi):
@@ -34,8 +42,7 @@ def predict():
     try:
         data = request.json
         
-        # Extract features in the correct order
-        # Expected mapping from frontend keys to backend dataset features
+        # Convert all frontend inputs to numeric values before prediction
         feature_values = []
         feature_values.append(float(data.get('pm25', 0)))
         feature_values.append(float(data.get('pm10', 0)))
@@ -46,12 +53,27 @@ def predict():
         feature_values.append(float(data.get('humidity', 0)))
         feature_values.append(float(data.get('windspeed', 0)))
         
+        # Log received values
+        logging.info(f"Received frontend inputs: {feature_values}")
+        
         # Prepare for prediction
         input_data = np.array([feature_values])
-        input_imputed = imputer.transform(input_data)
         
-        # Predict
-        predicted_aqi = model.predict(input_imputed)[0]
+        if 'pipeline' in globals() or 'pipeline' in locals():
+            predicted_aqi = pipeline.predict(input_data)[0]
+        else:
+            input_imputed = imputer.transform(input_data)
+            predicted_aqi = model.predict(input_imputed)[0]
+            
+        # Fix any NaN or undefined values
+        if np.isnan(predicted_aqi):
+            predicted_aqi = 0
+            
+        # Ensure it's realistic (0 to 500 max usually)
+        predicted_aqi = max(0, min(500, predicted_aqi))
+        
+        # Log prediction output
+        logging.info(f"Predicted AQI Value: {predicted_aqi}")
         
         category, recommendation, color = get_aqi_category(predicted_aqi)
         

@@ -21,7 +21,117 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    predictBtn.addEventListener('click', async () => {
+    const validationRules = {
+        city: { required: true },
+        pm25: { min: 0, max: 500, name: 'PM2.5' },
+        pm10: { min: 0, max: 500, name: 'PM10' },
+        no2: { min: 0, max: 200, name: 'NO2' },
+        so2: { min: 0, max: 100, name: 'SO2' },
+        co: { min: 0, max: 50, name: 'CO' },
+        temp: { min: -50, max: 50, name: 'Temperature' },
+        humidity: { min: 0, max: 100, name: 'Humidity' },
+        windspeed: { min: 0, max: 150, name: 'Wind Speed' }
+    };
+    
+    // Create Toast element
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    document.body.appendChild(toast);
+
+    function showToast(message) {
+        toast.innerHTML = `<i class="ph-fill ph-warning-circle" style="font-size: 20px;"></i> ${message}`;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function validateInput(value, rule) {
+        if (!value.trim()) return "This field is required";
+        if (rule.min !== undefined && rule.max !== undefined) {
+            const num = parseFloat(value);
+            if (isNaN(num)) return "Must be a valid number";
+            if (num < rule.min || num > rule.max) return `Must be between ${rule.min} and ${rule.max}`;
+        }
+        return "";
+    }
+
+    // Setup tooltips and clear error on input
+    Object.entries(validationRules).forEach(([id, rule]) => {
+        const input = document.getElementById(id);
+        if (input) {
+            const wrapper = input.closest('.input-wrapper');
+            
+            if (rule.min !== undefined && rule.max !== undefined) {
+                const helper = document.createElement('span');
+                helper.className = 'helper-tooltip';
+                helper.textContent = `Allowed range: ${rule.min} to ${rule.max}`;
+                wrapper.appendChild(helper);
+            }
+
+            // Only validate on blur (loses focus), NO input event listener
+            input.addEventListener('blur', () => {
+                const error = validateInput(input.value, rule);
+                let errorMsgEl = wrapper.nextElementSibling;
+                if (!errorMsgEl || !errorMsgEl.classList.contains('error-text')) {
+                    errorMsgEl = document.createElement('p');
+                    errorMsgEl.className = 'error-text';
+                    wrapper.after(errorMsgEl);
+                }
+                
+                if (error) {
+                    wrapper.classList.add('error');
+                    wrapper.classList.remove('valid');
+                    errorMsgEl.innerHTML = error;
+                    errorMsgEl.style.display = 'block';
+                } else if (input.value.trim() !== '') {
+                    wrapper.classList.remove('error');
+                    wrapper.classList.add('valid');
+                    errorMsgEl.style.display = 'none';
+                }
+            });
+        }
+    });
+
+    predictBtn.addEventListener('click', async (e) => {
+        let isValid = true;
+        let outOfRange = false;
+        
+        Object.entries(validationRules).forEach(([id, rule]) => {
+            const input = document.getElementById(id);
+            const wrapper = input.closest('.input-wrapper');
+            let errorMsgEl = wrapper.nextElementSibling;
+            
+            if (!errorMsgEl || !errorMsgEl.classList.contains('error-text')) {
+                errorMsgEl = document.createElement('p');
+                errorMsgEl.className = 'error-text';
+                wrapper.after(errorMsgEl);
+            }
+
+            const error = validateInput(input.value, rule);
+            
+            if (error) {
+                wrapper.classList.add('error');
+                wrapper.classList.remove('valid');
+                errorMsgEl.innerHTML = error;
+                errorMsgEl.style.display = 'block';
+                isValid = false;
+                if (error.includes('between')) outOfRange = true;
+            } else {
+                wrapper.classList.remove('error');
+                wrapper.classList.add('valid');
+                errorMsgEl.style.display = 'none';
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            if (outOfRange) {
+                showToast('Please enter values within valid range');
+            } else {
+                showToast('Please enter all required values');
+            }
+            return;
+        }
+
         const btn = predictBtn;
         const originalText = btn.innerHTML;
         
@@ -30,16 +140,16 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.disabled = true;
         
         try {
-            // Gather data
+            // Send exact user-entered values preserving decimals, NO auto-rounding or clamping
             const data = {
-                pm25: document.getElementById('pm25').value || 0,
-                pm10: document.getElementById('pm10').value || 0,
-                no2: document.getElementById('no2').value || 0,
-                so2: document.getElementById('so2').value || 0,
-                co: document.getElementById('co').value || 0,
-                temp: document.getElementById('temp').value || 0,
-                humidity: document.getElementById('humidity').value || 0,
-                windspeed: document.getElementById('windspeed').value || 0
+                pm25: document.getElementById('pm25').value,
+                pm10: document.getElementById('pm10').value,
+                no2: document.getElementById('no2').value,
+                so2: document.getElementById('so2').value,
+                co: document.getElementById('co').value,
+                temp: document.getElementById('temp').value,
+                humidity: document.getElementById('humidity').value,
+                windspeed: document.getElementById('windspeed').value
             };
             
             const response = await fetch('http://localhost:5000/predict', {
@@ -78,4 +188,113 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 3000);
         }
     });
+
+    // City Search Logic
+    const searchForm = document.getElementById('city-search-form');
+    const searchInput = document.getElementById('city-search-input');
+    const searchDropdown = document.getElementById('city-search-dropdown');
+    const searchContainer = document.getElementById('city-search-container');
+    const API_KEY = 'd8c1a00754c112994994993374d0badd';
+
+    const aqiMapping = {
+        1: { label: 'Good', color: '#10B981', value: '0-50' },
+        2: { label: 'Fair', color: '#F59E0B', value: '51-100' },
+        3: { label: 'Moderate', color: '#F97316', value: '101-150' },
+        4: { label: 'Poor', color: '#EF4444', value: '151-200' },
+        5: { label: 'Hazardous', color: '#8B5CF6', value: '201+' }
+    };
+
+    if (searchForm) {
+        searchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const query = searchInput.value.trim();
+            if (!query) return;
+
+            searchDropdown.style.display = 'block';
+            searchDropdown.innerHTML = `
+                <div class="loading-spinner">
+                    <i class="ph ph-spinner ph-spin"></i>
+                    <p>Scanning atmosphere...</p>
+                </div>
+            `;
+
+            try {
+                const geoRes = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=1&appid=${API_KEY}`);
+                const geoData = await geoRes.json();
+
+                if (!geoData || geoData.length === 0 || geoData.cod === "401") {
+                    throw new Error('City not found or Invalid API Key');
+                }
+
+                const { lat, lon, name, country } = geoData[0];
+
+                const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`);
+                const weatherData = await weatherRes.json();
+
+                const aqiRes = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`);
+                const aqiData = await aqiRes.json();
+
+                const aqiIndex = aqiData.list[0].main.aqi;
+                const aqiInfo = aqiMapping[aqiIndex] || aqiMapping[1];
+
+                const temp = Math.round(weatherData.main.temp);
+                const humidity = weatherData.main.humidity;
+                const condition = weatherData.weather[0].main;
+                const icon = weatherData.weather[0].icon;
+
+                searchDropdown.innerHTML = `
+                    <div class="result-card">
+                        <div class="result-header">
+                            <h3>${name}, ${country}</h3>
+                            <span class="aqi-badge" style="background-color: ${aqiInfo.color}">${aqiInfo.label}</span>
+                        </div>
+                        <div class="result-body">
+                            <div class="weather-info">
+                                <img src="https://openweathermap.org/img/wn/${icon}@2x.png" alt="weather" />
+                                <div>
+                                    <h1>${temp}°C</h1>
+                                    <p>${condition}</p>
+                                </div>
+                            </div>
+                            <div class="metrics-grid">
+                                <div class="metric">
+                                    <i class="ph ph-wind"></i>
+                                    <div>
+                                        <p class="label">AQI (US EPA)</p>
+                                        <p class="val">${aqiInfo.value}</p>
+                                    </div>
+                                </div>
+                                <div class="metric">
+                                    <i class="ph ph-drop"></i>
+                                    <div>
+                                        <p class="label">Humidity</p>
+                                        <p class="val">${humidity}%</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                searchDropdown.innerHTML = `
+                    <div class="error-message">
+                        <i class="ph ph-warning-circle"></i>
+                        <p>${err.message}</p>
+                    </div>
+                `;
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!searchContainer.contains(e.target)) {
+                searchDropdown.style.display = 'none';
+            }
+        });
+
+        searchInput.addEventListener('focus', () => {
+            if (searchDropdown.innerHTML.trim() !== '') {
+                searchDropdown.style.display = 'block';
+            }
+        });
+    }
 });

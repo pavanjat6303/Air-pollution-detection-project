@@ -9,27 +9,32 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 </head>
 <body>
     <div class="app-container">
         <!-- Top Navigation -->
-        <nav class="top-nav">
+        <nav class="top-nav" style="position: relative;">
             <div class="logo">
                 <h1>Air Pollution Prediction</h1>
                 <p>AI-Powered Environmental Monitoring</p>
             </div>
-            <div class="nav-right">
-                <div id="react-search-root"></div>
-                <button class="icon-btn notification-btn">
-                    <i class="ph ph-bell"></i>
-                    <span class="badge"></span>
-                </button>
-                <button class="icon-btn profile-btn">
-                    <i class="ph ph-user"></i>
-                </button>
+            
+            <!-- Perfectly centered search bar -->
+            <div class="nav-center" style="position: absolute; left: 50%; transform: translateX(-50%); width: 100%; max-width: 450px; z-index: 10;">
+                <div class="search-bar-container" id="city-search-container" style="width: 100%;">
+                    <form id="city-search-form" class="search-bar glassmorphism-search" style="width: 100%;">
+                        <i class="ph ph-magnifying-glass"></i>
+                        <input type="text" id="city-search-input" placeholder="Search city for live AQI..." style="width: 100%;">
+                    </form>
+                    <div id="city-search-dropdown" class="search-dropdown glassmorphism" style="display: none; width: 100%;">
+                        <!-- Content injected by JS -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nav-right" style="visibility: hidden;">
+                <!-- Empty div to maintain flexbox spacing balance -->
+                <div style="width: 200px;"></div>
             </div>
         </nav>
 
@@ -117,35 +122,35 @@
                                 <label>PM2.5 (µg/m³)</label>
                                 <div class="input-wrapper">
                                     <i class="ph ph-wave-sine"></i>
-                                    <input type="number" id="pm25" placeholder="0-500">
+                                    <input type="text" id="pm25" placeholder="0-500">
                                 </div>
                             </div>
 
                             <div class="input-group">
                                 <label>PM10 (µg/m³)</label>
                                 <div class="input-wrapper">
-                                    <input type="number" id="pm10" placeholder="0-500">
+                                    <input type="text" id="pm10" placeholder="0-500">
                                 </div>
                             </div>
 
                             <div class="input-group">
                                 <label>NO2 (ppb)</label>
                                 <div class="input-wrapper">
-                                    <input type="number" id="no2" placeholder="0-200">
+                                    <input type="text" id="no2" placeholder="0-200">
                                 </div>
                             </div>
 
                             <div class="input-group">
                                 <label>SO2 (ppb)</label>
                                 <div class="input-wrapper">
-                                    <input type="number" id="so2" placeholder="0-100">
+                                    <input type="text" id="so2" placeholder="0-100">
                                 </div>
                             </div>
 
                             <div class="input-group">
                                 <label>CO (ppm)</label>
                                 <div class="input-wrapper">
-                                    <input type="number" id="co" placeholder="0-50">
+                                    <input type="text" id="co" placeholder="0-50">
                                 </div>
                             </div>
 
@@ -153,7 +158,7 @@
                                 <label>Temperature (°C)</label>
                                 <div class="input-wrapper">
                                     <i class="ph ph-thermometer"></i>
-                                    <input type="number" id="temp" placeholder="-50 to 50">
+                                    <input type="text" id="temp" placeholder="-50 to 50">
                                 </div>
                             </div>
 
@@ -161,7 +166,7 @@
                                 <label>Humidity (%)</label>
                                 <div class="input-wrapper">
                                     <i class="ph ph-drop"></i>
-                                    <input type="number" id="humidity" placeholder="0-100">
+                                    <input type="text" id="humidity" placeholder="0-100">
                                 </div>
                             </div>
 
@@ -169,7 +174,7 @@
                                 <label>Wind Speed (km/h)</label>
                                 <div class="input-wrapper">
                                     <i class="ph ph-wind"></i>
-                                    <input type="number" id="windspeed" placeholder="0-100">
+                                    <input type="text" id="windspeed" placeholder="0-100">
                                 </div>
                             </div>
                         </div>
@@ -243,6 +248,5 @@
         </main>
     </div>
     <script src="script.js"></script>
-    <script type="text/babel" src="search.jsx"></script>
 </body>
 </html>
